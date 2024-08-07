@@ -1,1 +1,9 @@
 /.vs
+
+/GPRTestBase/obj
+/GPRTestBase/bin
+
+/GenericMathUtilities/obj
+/GenericMathUtilities/bin
+/GenericMathUtilities.Tests/obj
+/GenericMathUtilities.Tests/bin
