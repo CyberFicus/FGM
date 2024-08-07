@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PRTestBase", "GPRTestBase\P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenericMathUtilities.Tests", "GenericMathUtilities.Tests\GenericMathUtilities.Tests.csproj", "{42B8DF51-F664-45CA-994F-21D134B61E89}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModularArithmetic", "ModularArithmetic\ModularArithmetic.csproj", "{3F26E6B0-C5F9-4118-AC12-F4574C594B0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModularArithmetic.Tests", "ModularArithmetic.Tests\ModularArithmetic.Tests.csproj", "{FB9CBBB6-263C-47C8-88F2-ED25CC8A85EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{42B8DF51-F664-45CA-994F-21D134B61E89}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42B8DF51-F664-45CA-994F-21D134B61E89}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42B8DF51-F664-45CA-994F-21D134B61E89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F26E6B0-C5F9-4118-AC12-F4574C594B0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F26E6B0-C5F9-4118-AC12-F4574C594B0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F26E6B0-C5F9-4118-AC12-F4574C594B0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F26E6B0-C5F9-4118-AC12-F4574C594B0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB9CBBB6-263C-47C8-88F2-ED25CC8A85EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB9CBBB6-263C-47C8-88F2-ED25CC8A85EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB9CBBB6-263C-47C8-88F2-ED25CC8A85EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB9CBBB6-263C-47C8-88F2-ED25CC8A85EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

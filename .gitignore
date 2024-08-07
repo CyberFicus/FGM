@@ -7,3 +7,8 @@
 /GenericMathUtilities/bin
 /GenericMathUtilities.Tests/obj
 /GenericMathUtilities.Tests/bin
+
+/ModularArithmetic/obj
+/ModularArithmetic/bin
+/ModularArithmetic.Tests/obj
+/ModularArithmetic.Tests/bin
