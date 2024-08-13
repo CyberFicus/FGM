@@ -12,3 +12,8 @@
 /ModularArithmetic/bin
 /ModularArithmetic.Tests/obj
 /ModularArithmetic.Tests/bin
+
+/EllipticCurvesMath/obj
+/EllipticCurvesMath/bin
+/EllipticCurvesMath.Tests/obj
+/EllipticCurvesMath.Tests/bin

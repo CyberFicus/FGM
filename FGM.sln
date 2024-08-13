@@ -11,7 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenericMathUtilities.Tests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModularArithmetic", "ModularArithmetic\ModularArithmetic.csproj", "{3F26E6B0-C5F9-4118-AC12-F4574C594B0B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModularArithmetic.Tests", "ModularArithmetic.Tests\ModularArithmetic.Tests.csproj", "{FB9CBBB6-263C-47C8-88F2-ED25CC8A85EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModularArithmetic.Tests", "ModularArithmetic.Tests\ModularArithmetic.Tests.csproj", "{FB9CBBB6-263C-47C8-88F2-ED25CC8A85EB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EllipticCurvesMath", "EllipticCurvesMath\EllipticCurvesMath.csproj", "{3071FFE6-DDD1-4BA9-85F9-567281AFF3ED}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EllipticCurvesMath.Tests", "EllipticCurvesMath.Tests\EllipticCurvesMath.Tests.csproj", "{26D5096C-3192-4E60-A549-9FDC4D0A7FF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +43,14 @@ Global
 		{FB9CBBB6-263C-47C8-88F2-ED25CC8A85EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB9CBBB6-263C-47C8-88F2-ED25CC8A85EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB9CBBB6-263C-47C8-88F2-ED25CC8A85EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3071FFE6-DDD1-4BA9-85F9-567281AFF3ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3071FFE6-DDD1-4BA9-85F9-567281AFF3ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3071FFE6-DDD1-4BA9-85F9-567281AFF3ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3071FFE6-DDD1-4BA9-85F9-567281AFF3ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26D5096C-3192-4E60-A549-9FDC4D0A7FF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26D5096C-3192-4E60-A549-9FDC4D0A7FF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26D5096C-3192-4E60-A549-9FDC4D0A7FF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26D5096C-3192-4E60-A549-9FDC4D0A7FF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
