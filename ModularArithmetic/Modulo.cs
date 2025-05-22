@@ -9,9 +9,13 @@ namespace ModularArithmetic
     public class Modulo<T> : IEquatable<Modulo<T>>
         where T : IBinaryInteger<T>, IUnsignedNumber<T>, IMinMaxValue<T>
     {
+        #region properties
+
         public T Modulus { get; private set; }
         public bool CreateImmutableResidues { get; set; }
-        
+
+        #endregion properties
+
         public Modulo(T modulus) {
             this.Modulus = modulus; 
             CreateImmutableResidues = true;
@@ -25,34 +29,39 @@ namespace ModularArithmetic
             return $"mod {Modulus}";
         }
 
-        public T Add(T addend1, T addend2)
+        #region static math
+
+        public static T Add(T addend1, T addend2, T modulus)
         {
-            var buf = (addend1 + addend2) % Modulus;
+            var buf = (addend1 + addend2) % modulus;
             bool bitOverflowOfT = (addend1 > T.MaxValue - addend2);
             if (bitOverflowOfT)
             {
-                var overflowModN = (- Modulus) % Modulus; 
-                return Add(buf, overflowModN);
+                var overflowModN = (-modulus) % modulus;
+                return Modulo<T>.Add(buf, overflowModN, modulus);
             }
             return buf;
         }
-        public T Minus(T value)
+
+        public static T Minus(T value, T modulus)
         {
-            if (value > Modulus)
-                value %= Modulus;
-            return value == T.Zero ? value : Modulus - value;
+            if (value > modulus)
+                value %= modulus;
+            return value == T.Zero ? value : modulus - value;
         }
-        public T Subtract(T minuend, T subtrahend)
+
+        public static T Subtract(T minuend, T subtrahend, T modulus)
         {
-            return Add(minuend, Minus(subtrahend));
-        }  
-        public T Multiply(T multiplier1, T multiplier2)
+            return Modulo<T>.Add(minuend, Modulo<T>.Minus(subtrahend, modulus), modulus);
+        }
+
+        public static T Multiply(T multiplier1, T multiplier2, T modulus)
         {
             if (multiplier1 == T.Zero || multiplier2 == T.Zero) { return T.Zero; }
             bool noBitOverflow = (multiplier1 < GUMU<T>.SqrtOfOverflow && multiplier2 < GUMU<T>.SqrtOfOverflow || T.MaxValue / multiplier1 > multiplier2);
             if (noBitOverflow)
             {
-                return (multiplier1 * multiplier2) % Modulus;
+                return (multiplier1 * multiplier2) % modulus;
             }
 
             if (multiplier1 > multiplier2)
@@ -67,33 +76,42 @@ namespace ModularArithmetic
             for (int i = 0; multiplier1 > T.Zero; i++)
             {
                 if (T.IsOddInteger(multiplier1))
-                    result = Add(result, val2ShiftedModN);
+                    result = Modulo<T>.Add(result, val2ShiftedModN, modulus);
                 multiplier1 >>= 1;
-                val2ShiftedModN = Add(val2ShiftedModN, val2ShiftedModN);
+                val2ShiftedModN = Modulo<T>.Add(val2ShiftedModN, val2ShiftedModN, modulus);
             }
             return result;
         }
-        public T Inverse(T value)
+
+        public static T Inverse(T value, T modulus)
         {
             if (value == T.Zero) throw new ArgumentException();
             if (value == T.One) return value;
 
             T x, y;
-            var r = GUMU<T>.GetLinearGcd(value, out x, Modulus, out y);
-            if (r > T.One) throw new ModularDivisionException<T>(r, $"Unable to find inverse of {value}; GCD({value},{Modulus}) = {r}");
-            x = GUMU<T>.GetModuloAsSignedType(x, Modulus);
+            var r = GUMU<T>.GetLinearGcd(value, out x, modulus, out y);
+            if (r > T.One) 
+                throw new ModularDivisionException<T>(r, $"Unable to find inverse of {value}; GCD({value},{modulus}) = {r}");
+            x = GUMU<T>.GetModuloAsSignedType(x, modulus);
             return x;
         }
-        public T Divide(T dividend, T divisor)
+
+        public static T Divide(T dividend, T divisor, T modulus)
         {
-            return Multiply(dividend, Inverse(divisor));
+            return Modulo<T>.Multiply(dividend, Modulo<T>.Inverse(divisor, modulus), modulus);
         }
-        public T Power<TBinaryInteger>(T value, TBinaryInteger power)
+
+        public static T Power<TBinaryInteger>(T value, TBinaryInteger power, T modulus)
             where TBinaryInteger : IBinaryInteger<TBinaryInteger>
         {
-            if (power < TBinaryInteger.Zero) return Inverse(Power<TBinaryInteger>(value, -power));
-            if (power == TBinaryInteger.Zero) return T.One;
-            if (power == TBinaryInteger.One) return value % Modulus;
+            if (power < TBinaryInteger.Zero) 
+                return Modulo<T>.Inverse(Modulo<T>.Power<TBinaryInteger>(value, -power, modulus), modulus);
+            
+            if (power == TBinaryInteger.Zero) 
+                return T.One;
+            
+            if (power == TBinaryInteger.One) 
+                return value % modulus;
 
             var result = T.One;
             var valPow2iModN = value;
@@ -101,17 +119,18 @@ namespace ModularArithmetic
             {
                 if (TBinaryInteger.IsOddInteger(power))
                 {
-                    result = Multiply(result, valPow2iModN);
+                    result = Modulo<T>.Multiply(result, valPow2iModN, modulus);
                 }
                 power >>= 1;
-                valPow2iModN = Multiply(valPow2iModN, valPow2iModN); // val^{2^i}
+                valPow2iModN = Modulo<T>.Multiply(valPow2iModN, valPow2iModN, modulus); // val^{2^i}
             }
             return result;
         }
-        
-        private static T _LegendreSymbol(T a, T p)
+
+        public static T LegendreSymbol(T a, T p)
         {
             if (a == T.Zero || a == T.One) return a;
+
             T sign;
 
             if (T.IsEvenInteger(a))
@@ -119,7 +138,7 @@ namespace ModularArithmetic
                 sign = T.One;
                 if ((p % GUMU<T>.ConvertFrom<int>(8) == GUMU<T>.ConvertFrom(3)) || (p % GUMU<T>.ConvertFrom<int>(8) == GUMU<T>.ConvertFrom(5)))
                     sign = -T.One;
-                return _LegendreSymbol(a >> 1, p) * sign;
+                return LegendreSymbol(a >> 1, p) * sign;
             }
 
             sign = -T.One;
@@ -127,25 +146,26 @@ namespace ModularArithmetic
             var pShifted = p >> 1;
             if (T.IsEvenInteger(aShifted) || T.IsEvenInteger(pShifted)) sign = T.One;
 
-            return _LegendreSymbol(p % a, a) * sign;
+            return LegendreSymbol(p % a, a) * sign;
         }
-        public bool IsQuadraticResidue(T primeValue)
+
+        public static bool IsQuadraticResidue(T primeValue, T modulus)
         {
-            return (_LegendreSymbol(primeValue, Modulus) == T.One);
+            return LegendreSymbol(primeValue, modulus) == T.One;
         }
-        
-        private T _TonneliShanksAlgorithm(T val)
+
+        private static T TonneliShanksAlgorithm(T value, T modulus)
         {
             // Modulus-1 = 2^s * q
-            T s = T.Zero; T q = Modulus - T.One;
+            T s = T.Zero; T q = modulus - T.One;
             while (T.IsEvenInteger(q)) { s++; q >>= 1; }
 
             T nonQuadraticResidue = T.Zero;
-            for (T i = GUMU<T>.ConvertFrom<int>(2); nonQuadraticResidue == T.Zero; i++) if (_LegendreSymbol(i, Modulus) != T.One) nonQuadraticResidue = i;
+            for (T i = GUMU<T>.ConvertFrom<int>(2); nonQuadraticResidue == T.Zero; i++) if (LegendreSymbol(i, modulus) != T.One) nonQuadraticResidue = i;
 
-            T c = Power(nonQuadraticResidue, q);
-            T R = Power(val, (q + T.One) >> 1);
-            var t = Power(val, q);
+            T c = Modulo<T>.Power(nonQuadraticResidue, q, modulus);
+            T R = Modulo<T>.Power(value, (q + T.One) >> 1, modulus);
+            var t = Modulo<T>.Power(value, q, modulus);
             var M = s;
 
             while (true)
@@ -154,36 +174,89 @@ namespace ModularArithmetic
 
                 // i:  t^2^i = 1 mod p
                 T i = T.Zero, i2 = T.One;
-                while (Power(t, i2) != T.One && i < M - T.One) { i++; i2 <<= 1; }
+                while (Modulo<T>.Power(t, i2, modulus) != T.One && i < M - T.One) { i++; i2 <<= 1; }
 
-                T b = Power(c, Power(GUMU<T>.ConvertFrom<int>(2), M - i - T.One));
-                R = Multiply(R, b);
-                c = Multiply(b, b);
-                t = Multiply(t, c);
+                T b = Power(c, Modulo<T>.Power(GUMU<T>.ConvertFrom<int>(2), M - i - T.One, modulus), modulus);
+                R = Modulo<T>.Multiply(R, b, modulus);
+                c = Modulo<T>.Multiply(b, b, modulus);
+                t = Modulo<T>.Multiply(t, c, modulus);
                 M = i;
             }
         }
-        public T GetSqareRoot(T value)
+
+        public static T GetSqareRoot(T value, T modulus)
         {
             if (value == T.Zero || value == T.One) return value;
 
-            if (Modulus % GUMU<T>.ConvertFrom<int>(4) == GUMU<T>.ConvertFrom<int>(4))
+            if (modulus % GUMU<T>.ConvertFrom<int>(4) == GUMU<T>.ConvertFrom<int>(4))
             {
-                return Power(value, (Modulus++)>>2);
+                return Modulo<T>.Power(value, (modulus++) >> 2, modulus);
             }
 
-            if (Modulus % GUMU<T>.ConvertFrom<int>(8) == GUMU<T>.ConvertFrom<int>(5))
+            if (modulus % GUMU<T>.ConvertFrom<int>(8) == GUMU<T>.ConvertFrom<int>(5))
             {
-                var m = (Modulus - GUMU<T>.ConvertFrom<int>(5)) >>3;
-                T x = Power(value, m + T.One);
-                if (Power(x, 2) == value) return x;
+                var m = (modulus - GUMU<T>.ConvertFrom<int>(5)) >> 3;
+                T x = Modulo<T>.Power(value, m + T.One, modulus);
+                if (Modulo<T>.Power(x, 2, modulus) == value) return x;
 
-                x = Multiply(x, Power(GUMU<T>.ConvertFrom<int>(2),  Add(Multiply(m, GUMU<T>.ConvertFrom<int>(2)),T.One)));
-                return x;                
+                x = Modulo<T>.Multiply(x, Power(GUMU<T>.ConvertFrom<int>(2), Add(Modulo<T>.Multiply(m, GUMU<T>.ConvertFrom<int>(2), modulus), T.One, modulus),modulus), modulus);
+                return x;
             }
 
-            return _TonneliShanksAlgorithm(value);
+            return Modulo<T>.TonneliShanksAlgorithm(value, modulus);
         }
+
+        #endregion static math
+
+        #region non-static math
+
+        public T Add(T addend1, T addend2)
+        {
+            return Modulo<T>.Add(addend1, addend2, Modulus);
+        }
+ 
+        public T Minus(T value)
+        {
+            return Modulo<T>.Minus(value, Modulus);
+        }
+
+        public T Subtract(T minuend, T subtrahend)
+        {
+            return Modulo<T>.Subtract(minuend, subtrahend, Modulus);
+        }
+        
+        public T Multiply(T multiplier1, T multiplier2)
+        {
+            return Modulo<T>.Multiply(multiplier1, multiplier2, Modulus);
+        }
+        
+        public T Inverse(T value)
+        {
+            return Modulo<T>.Inverse(value, Modulus);
+        }
+
+        public T Divide(T dividend, T divisor)
+        {
+            return Modulo<T>.Divide(dividend, divisor, Modulus);
+        }
+
+        public T Power<TBinaryInteger>(T value, TBinaryInteger power)
+            where TBinaryInteger : IBinaryInteger<TBinaryInteger>
+        {
+            return Modulo<T>.Power<TBinaryInteger>(value, power, Modulus);
+        }
+        
+        public bool IsQuadraticResidue(T primeValue)
+        {
+            return Modulo<T>.IsQuadraticResidue(primeValue, Modulus);
+        }   
+
+        public T GetSqareRoot(T value)
+        {
+            return Modulo<T>.GetSqareRoot(value, Modulus);
+        }
+
+        #endregion non-static math
 
         public override int GetHashCode()
         {
