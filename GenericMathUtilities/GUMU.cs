@@ -3,9 +3,9 @@
 namespace GenericMathUtilities
 {
     /// <summary>
-    /// Generic Unsigned Math Utilities for type T 
+    /// Generic Unsigned Math Utilities for binary unsigned integer types which have minimal and maximal values defined
     /// </summary>
-    public  static class GUMU<T> 
+    public static class GUMU<T>
         where T : IBinaryInteger<T>, IUnsignedNumber<T>, IMinMaxValue<T>
     {
         private static T _msbMask = AllOnes ^ (AllOnes >> 1);
@@ -13,7 +13,7 @@ namespace GenericMathUtilities
         private static T _halfZerosHalfOnes = AllOnes >> (_bitLength / 2);
         private static T _sqrtOfOverflow = _halfZerosHalfOnes + T.One;
         /// <summary>
-        /// Type T value with all bytes set to ff
+        /// Type T value with all bytes set to 0xff
         /// </summary>
         public static T AllOnes { get { return T.MaxValue; } }
         /// <summary>
@@ -25,12 +25,12 @@ namespace GenericMathUtilities
         /// </summary>
         public static int Bitlength { get { return _bitLength; } }
         /// <summary>
-        /// Type T value with right part consisting of ones and left part consistent of zeros.
+        /// Type T value where all bits in left half are zeroed out and all bits in the right part are set to 1.
         /// <para>E.g. 0x0f for Byte, 0x00ff for UInt16, etc</para>
         /// </summary>
         public static T HalfZerosHalfOnes { get { return _halfZerosHalfOnes; } }
         /// <summary>
-        /// If both A and B are less that this value, multiplication of A*B certainly wont overflow type T 
+        /// If both A and B are less that this value, multiplication of A*B wont overflow type T 
         /// </summary>
         public static T SqrtOfOverflow { get { return _sqrtOfOverflow; } }
         /// <summary>
@@ -42,22 +42,23 @@ namespace GenericMathUtilities
         }
 
         /// <summary>
-        /// Converts value from type TOther to type T. If some bits dont fit, they are dropped
+        /// Converts value from type TOther to type T.
+        /// <para>If some bits dont fit, they are dropped. E.g. UInt16 0x0123 will be converted to Byte 0x23 </para>
         /// </summary>
-        public static T ConvertFrom<TInteger>(TInteger value)
-            where TInteger : IBinaryInteger<TInteger>, IMinMaxValue<TInteger>
+        public static T ConvertFrom<TOther>(TOther value)
+            where TOther : IBinaryInteger<TOther>, IMinMaxValue<TOther>
         {
-            TInteger bitDetectorO = TInteger.One;
+            TOther bitDetectorO = TOther.One;
             T bitAssignerT = T.One;
-            int bitBorder = int.Min(Bitlength, TInteger.Zero.GetByteCount() * 8);
+            int bitBorder = int.Min(Bitlength, TOther.Zero.GetByteCount() * 8);
             T res = T.Zero;
             for (int i = 0; i <= bitBorder; i++)
             {
-                if ((value & bitDetectorO) != TInteger.Zero)
+                if ((value & bitDetectorO) != TOther.Zero)
                 {
                     res = res | bitAssignerT;
                     value -= bitDetectorO;
-                    if (value == TInteger.Zero) return res;
+                    if (value == TOther.Zero) return res;
                 }
                 bitDetectorO <<= 1;
                 bitAssignerT <<= 1;
@@ -66,14 +67,15 @@ namespace GenericMathUtilities
         }
         /// <summary>
         /// Converts value from type T to type TOther. If some bits dont fit, they are dropped
+        /// <para>If some bits dont fit, they are dropped. E.g. UInt16 0x0123 will be converted to Byte 0x23 </para>
         /// </summary>
-        public static TInteger ConvertTo<TInteger>(T value)
-            where TInteger : IBinaryInteger<TInteger>, IMinMaxValue<TInteger>
+        public static TOther ConvertTo<TOther>(T value)
+            where TOther : IBinaryInteger<TOther>, IMinMaxValue<TOther>
         {
             T bitDetectorT = T.One;
-            TInteger bitAssignerO = TInteger.One;
-            int bitBorder = int.Min(Bitlength, TInteger.Zero.GetByteCount() * 8);
-            var res = TInteger.Zero;
+            TOther bitAssignerO = TOther.One;
+            int bitBorder = int.Min(Bitlength, TOther.Zero.GetByteCount() * 8);
+            var res = TOther.Zero;
             for (int i = 0; i <= bitBorder; i++)
             {
                 if ((value & bitDetectorT) != T.Zero)
@@ -91,7 +93,7 @@ namespace GenericMathUtilities
         /// <summary>
         /// Returns a random value of type T
         /// </summary>
-        /// <param name="random">Uses passed instance of Random or creates new one if rnd is null</param>
+        /// <param name="random">Uses passed instance of Random or creates new one if the passed one is null</param>
         public static T Random(Random? random = null)
         {
             if (random == null) random = new Random();
@@ -110,8 +112,8 @@ namespace GenericMathUtilities
         /// Returns a random value of type T that is less then a specified maximum
         /// </summary>
         /// <param name="maxValue">Exclusive upper bound of the random number to be generated</param>
-        /// <param name="random">Uses passed instance of Random or creates new one if rnd is null</param>
-        public static T Random(T maxValue,Random? random = null)
+        /// <param name="random">Uses passed instance of Random or creates new one if the passed one is null</param>
+        public static T Random(T maxValue, Random? random = null)
         {
             if (maxValue == T.Zero) return T.Zero;
             return Random(random) % maxValue;
@@ -121,21 +123,21 @@ namespace GenericMathUtilities
         /// </summary>
         /// <param name="minValue">Inclusive lower bound of the random number returned.</param>
         /// <param name="maxValue">Exclusive upper bound of the random number returned. <paramref name="maxValue"/> must be greater than or equal to <paramref name="minValue"/>.</param>
-        /// <param name="random">Uses passed instance of Random or creates new one if rnd is null</param>
+        /// <param name="random">Uses passed instance of Random or creates new one if the passed one is null</param>
         public static T Random(T minValue, T maxValue, Random? random = null)
         {
             if (maxValue < minValue) throw new ArgumentOutOfRangeException("maxValue is smaller then minValue");
             if (minValue == T.Zero)
             {
                 if (maxValue == T.MaxValue) return Random(random);
-                return Random(maxValue+T.One, random);
+                return Random(maxValue + T.One, random);
             }
             T rangeLength = maxValue - minValue + T.One;
             return minValue + Random(rangeLength, random);
         }
 
         /// <summary>
-        /// Calculates Greatest Common Divisor of two values
+        /// Calculates GCD (greatest common divisor) of two values
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public static T GetGcd(T firstValue, T secondValue)
@@ -157,7 +159,7 @@ namespace GenericMathUtilities
             return current;
         }
         /// <summary>
-        /// Calculates Greatest Common Divisor of two values and coefficients of its linear form as well
+        /// Calculates GCD (greatest common divisor) of two values and coefficients of its linear form as well
         /// <para>Linear form: firstValue * firstCoefficient + secondValue * secondCoefficient = gcd</para>
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
@@ -200,8 +202,8 @@ namespace GenericMathUtilities
             return current;
         }
         /// <summary>
-        /// Calculates value mod modulus. Treats value as signed type if its most significant bit is set to 1
-        /// <para>Designed specifically to work with output of GetLinearGcd</para>>
+        /// Given value and modulus, calculates residue. Treats value as a negative value of signed type if its most significant bit is set to 1
+        /// <para>Designed specifically to work with output of GUMU.GetLinearGcd</para>
         /// </summary>
         public static T GetModuloAsSignedType(T value, T modulus)
         {
